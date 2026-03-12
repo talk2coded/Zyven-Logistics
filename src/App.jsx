@@ -2063,7 +2063,6 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
       title: 'Phone Support',
       main: '+1 (319) 380-3526',
       hours: 'Mon-Fri: 8am - 6pm CST',
-      tollFree: 'Toll-free: +1 (800) 555-0199',
       action: 'Call Now',
       link: 'tel:: +13193803526'
     },
@@ -2496,7 +2495,7 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
             <p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 600, margin: '0 auto 24px', lineHeight: 1.6 }}>
               For urgent shipment issues outside business hours, call our 24/7 emergency hotline.
             </p>
-            <a href="tel:+18005550199" style={{
+            <a href="tel:+13193803526" style={{
               display: 'inline-block',
               padding: '16px 32px',
               background: BRAND_COLOR,
@@ -2507,7 +2506,7 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
               fontFamily: "'IBM Plex Mono',monospace",
               textDecoration: 'none'
             }}>
-              +1 (800) 555-0199
+             +1 (319) 380-3526
             </a>
           </div>
         </section>
@@ -2579,13 +2578,7 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
               <div style={{ color: '#475569', fontSize: 13 }}>
                 © {new Date().getFullYear()} {BRAND_NAME}. All rights reserved.
               </div>
-              <div style={{ display: 'flex', gap: 16 }}>
-                {['LinkedIn', 'Twitter', 'Instagram', 'Facebook'].map((social) => (
-                  <span key={social} style={{ color: '#64748b', fontSize: 13, cursor: 'pointer' }}>
-                    {social}
-                  </span>
-                ))}
-              </div>
+            
             </div>
           </div>
         </footer>
