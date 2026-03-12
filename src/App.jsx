@@ -2072,7 +2072,6 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
       title: 'Email',
       sales: 'sales@zyvenlogistics.com',
       support: 'support@zyvenlogistics.com',
-      careers: 'careers@zyvenlogistics.com',
       action: 'Send Email',
       link: 'mailto:sales@zyvenlogistics.com'
     },
@@ -2080,10 +2079,10 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
   ]
 
   const globalOffices = [
-    { region: 'North America', city: 'Houston', phone: '+1 (713) 555-0147', flag: '🇺🇸' },
-    { region: 'Europe', city: 'Rotterdam', phone: '+31 10 200 1000', flag: '🇳🇱' },
-    { region: 'Asia Pacific', city: 'Singapore', phone: '+65 6123 4567', flag: '🇸🇬' },
-    { region: 'Middle East', city: 'Dubai', phone: '+971 4 123 4567', flag: '🇦🇪' },
+    { region: 'North America', city: 'Houston',  flag: '🇺🇸' },
+    { region: 'Europe', city: 'Rotterdam',  flag: '🇳🇱' },
+    { region: 'Asia Pacific', city: 'Singapore', flag: '🇸🇬' },
+    { region: 'Middle East', city: 'Dubai', flag: '🇦🇪' },
   ]
 
   const departments = [
@@ -2091,8 +2090,8 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
     { name: 'Customer Support', email: 'support@zyvenlogistics.com', desc: 'Existing shipment assistance' },
     { name: 'Billing', email: 'billing@zyvenlogistics.com', desc: 'Invoices & payment questions' },
     { name: 'Claims', email: 'claims@zyvenlogistics.com', desc: 'Damage or loss reports' },
-    { name: 'Partnerships', email: 'partners@zyvenlogistics.com', desc: 'Strategic alliances' },
-    { name: 'Careers', email: 'careers@zyvenlogistics.com', desc: 'Join our team' },
+   
+   
   ]
 
   return (
@@ -2310,10 +2309,7 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
                             <span style={{ color: '#64748b', fontSize: 13 }}>Support:</span>
                             <span style={{ color: '#e2e8f0', fontSize: 14 }}>{card.support}</span>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ color: '#64748b', fontSize: 13 }}>Careers:</span>
-                            <span style={{ color: '#e2e8f0', fontSize: 14 }}>{card.careers}</span>
-                          </div>
+                         
                         </div>
                       </>
                     )}
