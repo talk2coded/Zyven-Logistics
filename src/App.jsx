@@ -117,7 +117,7 @@ function TruckTracker({ status }) {
 
   const truckPos = isDelivered ? '85%' : isMoving ? '48%' : '18%'
   const lightColor = isMoving ? '#22c55e' : isDelivered ? '#3b82f6' : isStopped ? '#ef4444' : '#f59e0b'
-  const statusText = isMoving ? '● VESSEL IN MOTION'
+  const statusText = isMoving ? '● SHIPMENT IN MOTION'
     : isDelivered ? '● DELIVERED'
     : isStopped ? '● SHIPMENT STOPPED'
     : '● PROCESSING ORDER'
@@ -2085,10 +2085,10 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
   ]
 
   const departments = [
-    { name: 'Sales & Quotes', email: 'sales@zyvenlogistics.com', desc: 'New business inquiries & pricing' },
+   
     { name: 'Customer Support', email: 'support@zyvenlogistics.com', desc: 'Existing shipment assistance' },
-    { name: 'Billing', email: 'billing@zyvenlogistics.com', desc: 'Invoices & payment questions' },
-    { name: 'Claims', email: 'claims@zyvenlogistics.com', desc: 'Damage or loss reports' },
+   
+    { name: 'Claims', email: 'support@zyvenlogistics.com', desc: 'Damage or loss reports' },
    
    
   ]
@@ -3149,9 +3149,10 @@ function TrackerPage({ onBack, onAdminClick }) {
                 
                 <InfoCard title="📍 Locations" rows={[
                   ['Origin', result.port_1_location || result.sender_address],
-                  ['Current', result.current_location || result.custom_location || 'In Transit'],
-                  ['Destination', result.receiver_city],
+                  ['Current', result.status === 'Delivered' ? null : result.status === 'Stopped' ? result.stopped_country || result.current_location : result.current_location || result.custom_location || 'In Transit'],
+                
                   ['Next Stop', result.port_2_location || '—'],
+                  ['Destination', result.receiver_city],
                 ]} />
                 
                 <InfoCard title="👥 Parties" rows={[
@@ -3400,7 +3401,7 @@ function AdminLogin({ onLogin, onBack }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 const EMPTY = {
   tracking_id: '', sender_name: '', sender_phone: '', sender_address: '',
-  receiver_name: '', receiver_phone: '', receiver_email: '', receiver_address: '', receiver_city: '',
+  receiver_name: '', receiver_phone: '', receiver_email: '', receiver_address: '', receiver_country: '',
   package_desc: '', package_weight: '', take_off_date: '', delivery_date: '',
   status: 'Processing', current_location: '',
   port_1_location: '', port_2_location: '', port_3_location: '',
@@ -3443,14 +3444,14 @@ function AdminDashboard({ onLogout, onPublic }) {
   }
 
   async function saveForm() {
-    const required = ['sender_name','sender_phone','sender_address','receiver_name','receiver_phone','receiver_address','receiver_city','package_desc','take_off_date','delivery_date']
+    const required = ['sender_name','sender_phone','sender_address','receiver_name','receiver_phone','receiver_address','package_desc','take_off_date','delivery_date']
     for (const f of required) {
       if (!form[f]?.toString().trim()) {
         flash(`Please fill: ${f.replace(/_/g, ' ')}`, false); return
       }
     }
     setSaving(true)
-    const payload = { ...form, package_weight: parseFloat(form.package_weight) || null, delivery_fee: parseFloat(form.delivery_fee) || null, amount_paid: parseFloat(form.amount_paid) || null }
+    const payload = { ...form, package_weight: parseFloat(form.package_weight) || null, delivery_fee: parseFloat(form.delivery_fee) || null, amount_paid: parseFloat(form.amount_paid) || null, stopped_date: form.stopped_date || null }
 
     let error
     if (editId) {
@@ -3644,7 +3645,8 @@ function AdminDashboard({ onLogout, onPublic }) {
                 <FF label="Phone Number *"    val={form.receiver_phone}   onChange={v => set('receiver_phone', v)} />
                 <FF label="Email"             val={form.receiver_email}   onChange={v => set('receiver_email', v)} />
                 <FF label="Delivery Address *"val={form.receiver_address} onChange={v => set('receiver_address', v)} />
-                <FF label="City *"            val={form.receiver_city}    onChange={v => set('receiver_city', v)} />
+               
+                <FF label="Country *"         val={form.receiver_country} onChange={v => set('receiver_country', v)} placeholder="e.g. United States" />
               </Sec>
 
               <Sec title="📦 Package">
