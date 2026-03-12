@@ -36,7 +36,9 @@ function printReceipt(s) {
   .ftot{font-size:18px;font-weight:700;color:#E8880A;border-top:1px solid #444;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between}
   .foot{text-align:center;margin-top:24px;font-size:11px;color:#999;border-top:1px dashed #ccc;padding-top:14px}
   .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
-  .transit{background:#FEF3C7;color:#92400E}
+  .transit{background:#DBEAFE;color:#1D4ED8}
+  .moving{background:#DCFCE7;color:#166534}
+  .stopped{background:#FEE2E2;color:#991B1B}
   .delivered{background:#D1FAE5;color:#065F46}
   .pending{background:#F3F4F6;color:#374151}
   @media print{body{padding:10px}}
@@ -46,11 +48,21 @@ function printReceipt(s) {
 <div class="tid">${s.tracking_id}</div>
 <div class="sec">
   <div class="sh">Shipment Status</div>
-  <div class="row"><span class="lbl">Status</span><span class="val"><span class="badge ${s.status === 'In Transit' ? 'transit' : s.status === 'Delivered' ? 'delivered' : 'pending'}">${s.status}</span></span></div>
+  <div class="row"><span class="lbl">Status</span><span class="val"><span class="badge ${s.status === 'Moving' || s.status === 'In Transit' ? 'moving' : s.status === 'Stopped' ? 'stopped' : s.status === 'Delivered' ? 'delivered' : 'pending'}">${s.status}</span></span></div>
   <div class="row"><span class="lbl">Take-off Date</span><span class="val">${s.take_off_date}</span></div>
   <div class="row"><span class="lbl">Est. Delivery</span><span class="val">${s.delivery_date}</span></div>
-  <div class="row"><span class="lbl">Current Location</span><span class="val">${s.current_location || '—'}</span></div>
+  <div class="row"><span class="lbl">Est. Delivery Time</span><span class="val">${s.estimated_delivery_time || '—'}</span></div>
+  <div class="row"><span class="lbl">Current Location</span><span class="val">${s.current_location || s.custom_location || '—'}</span></div>
+  ${s.stopped_date ? `<div class="row"><span class="lbl">Date Stopped</span><span class="val">${s.stopped_date}</span></div>` : ''}
+  ${s.stopped_country ? `<div class="row"><span class="lbl">Stop Location</span><span class="val">${s.stopped_country}</span></div>` : ''}
 </div>
+${(s.port_1_location || s.port_2_location || s.port_3_location) ? `
+<div class="sec">
+  <div class="sh">Port Route</div>
+  ${s.port_1_location ? `<div class="row"><span class="lbl">Port 1 (Origin)</span><span class="val">${s.port_1_location}</span></div>` : ''}
+  ${s.port_2_location ? `<div class="row"><span class="lbl">Port 2 (Transit)</span><span class="val">${s.port_2_location}</span></div>` : ''}
+  ${s.port_3_location ? `<div class="row"><span class="lbl">Port 3 (Final)</span><span class="val">${s.port_3_location}</span></div>` : ''}
+</div>` : ''}
 <div class="sec">
   <div class="sh">Sender</div>
   <div class="row"><span class="lbl">Name</span><span class="val">${s.sender_name}</span></div>
@@ -97,74 +109,41 @@ function Spinner() {
   )
 }
 
-// ─── Animated Truck ────────────────────────────────────────────────────────────
 function TruckTracker({ status }) {
-  const isMoving   = status === 'In Transit'
+  const isMoving    = status === 'Moving'   || status === 'In Transit'
+  const isStopped   = status === 'Stopped'
   const isDelivered = status === 'Delivered'
+  const isProcessing = status === 'Processing' || status === 'Pending'
+
+  const truckPos = isDelivered ? '85%' : isMoving ? '48%' : '18%'
+  const lightColor = isMoving ? '#22c55e' : isDelivered ? '#3b82f6' : isStopped ? '#ef4444' : '#f59e0b'
+  const statusText = isMoving ? '● VESSEL IN MOTION'
+    : isDelivered ? '● DELIVERED'
+    : isStopped ? '● SHIPMENT STOPPED'
+    : '● PROCESSING ORDER'
+  const statusSub = isMoving ? 'Live tracking active — shipment currently en route'
+    : isDelivered ? 'Package successfully delivered to recipient'
+    : isStopped ? 'Shipment has been held — check location details below'
+    : 'Order being processed and prepared for dispatch'
 
   return (
-    <div style={{
-      background: 'linear-gradient(135deg,#0f1923 0%,#1a2840 100%)',
-      borderRadius: 16, padding: '28px 24px',
-      border: '1px solid #2a3a55', position: 'relative', overflow: 'hidden'
-    }}>
-      {/* Road */}
-      <div style={{
-        background: '#1e2a3a', borderRadius: 8, height: 76,
-        position: 'relative', overflow: 'hidden', marginBottom: 16,
-        border: '1px solid #2a3a55'
-      }}>
+    <div style={{ background: 'linear-gradient(135deg,#0f1923 0%,#1a2840 100%)', borderRadius: 16, padding: '28px 24px', border: '1px solid #2a3a55', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: '#1e2a3a', borderRadius: 8, height: 76, position: 'relative', overflow: 'hidden', marginBottom: 16, border: '1px solid #2a3a55' }}>
         {[0,1,2,3,4,5,6,7].map(i => (
-          <div key={i} style={{
-            position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-            left: `${i * 14}%`, width: 40, height: 6, background: BRAND_COLOR,
-            borderRadius: 3, opacity: 0.35,
-            animation: isMoving ? `roadMove 0.8s linear infinite` : 'none',
-            animationDelay: `${i * -0.1}s`
-          }} />
+          <div key={i} style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', left: `${i * 14}%`, width: 40, height: 6, background: BRAND_COLOR, borderRadius: 3, opacity: 0.35, animation: isMoving ? `roadMove 0.8s linear infinite` : 'none', animationDelay: `${i * -0.1}s` }} />
         ))}
-        {/* Truck */}
-        <div style={{
-          position: 'absolute', top: '50%',
-          left: isDelivered ? '85%' : isMoving ? '48%' : '18%',
-          transition: 'left 1.5s ease-in-out',
-          transform: 'translateY(-50%)', fontSize: 34,
-          animation: isMoving ? 'truckBounce 0.3s ease-in-out infinite alternate' : 'none'
-        }}>🚚</div>
-        {/* Dust */}
+        <div style={{ position: 'absolute', top: '50%', left: truckPos, transition: 'left 1.5s ease-in-out', transform: 'translateY(-50%)', fontSize: 34, animation: isMoving ? 'truckBounce 0.3s ease-in-out infinite alternate' : 'none' }}>
+          {isDelivered ? '🏠' : isMoving ? '🚢' : isStopped ? '🛑' : '🚚'}
+        </div>
         {isMoving && [0,1,2].map(i => (
-          <div key={i} style={{
-            position: 'absolute', left: '32%', top: `${28 + i * 16}%`,
-            width: 6, height: 6, borderRadius: '50%', background: BRAND_COLOR,
-            opacity: 0.3,
-            animation: 'dustFly 0.6s ease-out infinite',
-            animationDelay: `${i * 0.2}s`
-          }} />
+          <div key={i} style={{ position: 'absolute', left: '32%', top: `${28 + i * 16}%`, width: 6, height: 6, borderRadius: '50%', background: BRAND_COLOR, opacity: 0.3, animation: 'dustFly 0.6s ease-out infinite', animationDelay: `${i * 0.2}s` }} />
         ))}
       </div>
-
-      {/* Status light */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{
-          width: 14, height: 14, borderRadius: '50%', flexShrink: 0,
-          background: isMoving ? '#22c55e' : isDelivered ? '#3b82f6' : '#f59e0b',
-          animation: isMoving ? 'pulse 1.2s ease-in-out infinite' : 'none',
-          boxShadow: isMoving ? undefined : isDelivered
-            ? '0 0 8px rgba(59,130,246,0.8)'
-            : '0 0 8px rgba(245,158,11,0.6)'
-        }} />
+        <div style={{ width: 14, height: 14, borderRadius: '50%', flexShrink: 0, background: lightColor, animation: isMoving ? 'pulse 1.2s ease-in-out infinite' : 'none', boxShadow: `0 0 10px ${lightColor}99` }} />
         <div>
-          <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 700, letterSpacing: 1,
-            color: isMoving ? '#22c55e' : isDelivered ? '#60a5fa' : '#fbbf24'
-          }}>
-            {isMoving ? '● VEHICLE IN MOTION' : isDelivered ? '● DELIVERED' : '● AWAITING DISPATCH'}
-          </div>
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-            {isMoving ? 'Live tracking active — shipment en route'
-              : isDelivered ? 'Package successfully delivered to recipient'
-              : 'Shipment registered, pending pickup'}
-          </div>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 700, letterSpacing: 1, color: lightColor }}>{statusText}</div>
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{statusSub}</div>
         </div>
       </div>
     </div>
@@ -173,38 +152,37 @@ function TruckTracker({ status }) {
 
 // ─── Journey Steps ─────────────────────────────────────────────────────────────
 function JourneySteps({ status }) {
+  const ord = { 'Processing': 0, 'Pending': 0, 'Moving': 2, 'In Transit': 2, 'Stopped': 2, 'Delivered': 3 }
+  const level = ord[status] ?? 0
+  const isStopped = status === 'Stopped'
+
   const steps = [
-    { label: 'Registered', icon: '📋', done: true },
-    { label: 'Picked Up',  icon: '📦', done: status !== 'Pending' },
-    { label: 'In Transit', icon: '🚚', done: status === 'In Transit' || status === 'Delivered', active: status === 'In Transit' },
-    { label: 'Delivered',  icon: '✅', done: status === 'Delivered' },
+    { label: 'Processing', icon: '📋' },
+    { label: 'Port 1',     icon: '⚓' },
+    { label: 'In Transit', icon: '🚢' },
+    { label: 'Delivered',  icon: '✅' },
   ]
   return (
     <div style={{ display: 'flex', alignItems: 'center', padding: '20px 8px' }}>
-      {steps.map((s, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < steps.length - 1 ? 1 : 'none' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-            <div style={{
-              width: 42, height: 42, borderRadius: '50%', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', fontSize: 18,
-              background: s.done ? (s.active ? BRAND_COLOR : '#22c55e') : '#1e2a3a',
-              border: `2px solid ${s.active ? BRAND_COLOR : s.done ? '#22c55e' : '#2a3a55'}`,
-              boxShadow: s.active ? `0 0 18px rgba(232,136,10,0.5)` : 'none',
-              animation: s.active ? 'pulse 1.4s ease-in-out infinite' : 'none'
-            }}>{s.icon}</div>
-            <span style={{ fontSize: 10, color: s.done ? '#e2e8f0' : '#475569', fontWeight: 600, letterSpacing: 0.5, whiteSpace: 'nowrap' }}>
-              {s.label}
-            </span>
+      {steps.map((s, i) => {
+        const done   = level > i || (level === i && !isStopped)
+        const active = level === i && !isStopped
+        const stopped = isStopped && level === i
+        const dotColor = stopped ? '#ef4444' : done ? '#22c55e' : active ? BRAND_COLOR : '#1e2a3a'
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < steps.length - 1 ? 1 : 'none' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, background: stopped ? 'rgba(239,68,68,0.15)' : done ? '#22c55e22' : active ? BRAND_COLOR + '22' : '#1e2a3a', border: `2px solid ${dotColor}`, boxShadow: (active || stopped) ? `0 0 18px ${dotColor}88` : 'none', animation: active ? 'pulse 1.4s ease-in-out infinite' : 'none' }}>
+                {stopped ? '🛑' : s.icon}
+              </div>
+              <span style={{ fontSize: 10, color: done || active ? '#e2e8f0' : '#475569', fontWeight: 600, letterSpacing: 0.5, whiteSpace: 'nowrap' }}>{s.label}</span>
+            </div>
+            {i < steps.length - 1 && (
+              <div style={{ flex: 1, height: 2, margin: '0 6px', marginBottom: 20, background: level > i ? '#22c55e' : '#1e2a3a', transition: 'background 0.6s' }} />
+            )}
           </div>
-          {i < steps.length - 1 && (
-            <div style={{
-              flex: 1, height: 2, margin: '0 6px', marginBottom: 20,
-              background: s.done ? '#22c55e' : '#1e2a3a',
-              transition: 'background 0.6s'
-            }} />
-          )}
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -228,17 +206,20 @@ function InfoCard({ title, rows }) {
 
 // ─── Status Badge ──────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
-  const cfg = {
-    'In Transit': { bg: 'rgba(34,197,94,0.15)',   color: '#22c55e' },
-    'Delivered':  { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
-    'Pending':    { bg: 'rgba(251,191,36,0.15)',  color: '#fbbf24' },
-  }[status] || { bg: '#1e2a3a', color: '#94a3b8' }
+  const map = {
+    'Processing': { bg: 'rgba(99,102,241,0.18)',  color: '#a5b4fc', label: '⏳ Processing'  },
+    'Moving':     { bg: 'rgba(34,197,94,0.15)',   color: '#4ade80', label: '🚢 Moving'       },
+    'Stopped':    { bg: 'rgba(239,68,68,0.15)',   color: '#f87171', label: '🛑 Stopped'      },
+    'Delivered':  { bg: 'rgba(16,185,129,0.15)',  color: '#34d399', label: '✅ Delivered'    },
+    // legacy aliases
+    'Pending':    { bg: 'rgba(99,102,241,0.18)',  color: '#a5b4fc', label: '⏳ Processing'  },
+    'In Transit': { bg: 'rgba(34,197,94,0.15)',   color: '#4ade80', label: '🚢 Moving'       },
+  }
+  const cfg = map[status] || { bg: '#1e2a3a', color: '#94a3b8', label: status }
   return (
-    <span style={{
-      ...cfg, padding: '3px 12px', borderRadius: 20,
-      fontSize: 11, fontWeight: 700, letterSpacing: 1,
-      fontFamily: "'IBM Plex Mono',monospace"
-    }}>● {status}</span>
+    <span style={{ background: cfg.bg, color: cfg.color, padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'IBM Plex Mono',monospace", whiteSpace: 'nowrap' }}>
+      {cfg.label}
+    </span>
   )
 }
 
@@ -724,7 +705,11 @@ function HomePage({ onAdminClick, onTrackClick }) {
               ZYVEN<span style={{ color: BRAND_COLOR }}>.</span>
             </div>
             <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.6, color: '#94a3b8' }}>
-              Professional logistics with real-time shipment visibility and delivery accountability.
+              International logistics with real-time shipment visibility, port-to-door delivery, and full tracking accountability.
+            </div>
+            <div style={{ marginTop: 14, fontSize: 12, color: '#64748b', lineHeight: 1.8 }}>
+              <div style={{ color: '#94a3b8', fontWeight: 600, letterSpacing: 1, fontFamily: "'IBM Plex Mono',monospace", fontSize: 10, marginBottom: 4 }}>HEADQUARTERS</div>
+              3300 Claymoore Park Dr<br />Houston, TX 77043<br />United States
             </div>
           </div>
 
@@ -751,7 +736,7 @@ function HomePage({ onAdminClick, onTrackClick }) {
           <div>
             <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 11, letterSpacing: 2, color: '#94a3b8' }}>TRACKING</div>
             <div style={{ marginTop: 10, fontSize: 13, color: '#94a3b8', lineHeight: 1.6 }}>
-              Have a tracking ID? Get status updates instantly on this page.
+              Have a tracking ID? Get live status, port locations, and delivery updates instantly.
             </div>
             <button onClick={onTrackClick} style={{
               marginTop: 12, background: 'rgba(232,136,10,0.14)', border: '1px solid rgba(232,136,10,0.28)',
@@ -767,7 +752,7 @@ function HomePage({ onAdminClick, onTrackClick }) {
             {BRAND_NAME} © {new Date().getFullYear()} — {BRAND_TAGLINE}
           </div>
           <div style={{ fontSize: 12, color: '#475569' }}>
-            Built for clarity • Designed for trust
+            3300 Claymoore Park Dr, Houston TX 27045 · United States
           </div>
         </div>
       </footer>
@@ -880,21 +865,33 @@ function TrackerPage({ onBack, onAdminClick }) {
           </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(250px,1fr))', gap: 10 }}>
-            <InfoCard title="📅 DATES" rows={[
-              ['Take-off', result.take_off_date],
-              ['Est. Delivery', result.delivery_date],
-              ['Current Location', result.current_location],
-            ]} />
-            <InfoCard title="📦 PACKAGE" rows={[
-              ['Description', result.package_desc],
-              ['Weight', result.package_weight ? `${result.package_weight} kg` : null],
-              ['Status', result.status],
-            ]} />
-                <InfoCard title="📍 DESTINATION" rows={[
-              ['City', result.receiver_city],
-                  ['Tracking', result.tracking_id],
-            ]} />
-          </div>
+                <InfoCard title="📅 DATES & TIMELINE" rows={[
+                  ['Take-off',     result.take_off_date],
+                  ['Est. Delivery', result.delivery_date],
+                  ['Delivery Time', result.estimated_delivery_time],
+                ]} />
+                <InfoCard title="📦 PACKAGE" rows={[
+                  ['Description', result.package_desc],
+                  ['Weight', result.package_weight ? `${result.package_weight} kg` : null],
+                  ['Status', result.status],
+                ]} />
+                <InfoCard title="📍 CURRENT LOCATION" rows={[
+                  ['Current Location', result.current_location],
+                  ['Custom Location',  result.custom_location],
+                  ['Destination City', result.receiver_city],
+                ]} />
+                <InfoCard title="🚢 PORT ROUTE" rows={[
+                  ['Port 1 (Origin)',  result.port_1_location],
+                  ['Port 2 (Transit)', result.port_2_location],
+                  ['Port 3 (Final)',   result.port_3_location],
+                ]} />
+                {(result.stopped_date || result.stopped_country) && (
+                  <InfoCard title="🛑 HOLD / STOP DETAILS" rows={[
+                    ['Date Stopped',       result.stopped_date],
+                    ['Location of Stop',   result.stopped_country],
+                  ]} />
+                )}
+              </div>
             </section>
           )}
         </div>
@@ -978,7 +975,11 @@ const EMPTY = {
   tracking_id: '', sender_name: '', sender_phone: '', sender_address: '',
   receiver_name: '', receiver_phone: '', receiver_email: '', receiver_address: '', receiver_city: '',
   package_desc: '', package_weight: '', take_off_date: '', delivery_date: '',
-  status: 'Pending', current_location: '', delivery_fee: '', amount_paid: '', notes: ''
+  status: 'Processing', current_location: '',
+  port_1_location: '', port_2_location: '', port_3_location: '',
+  estimated_delivery_time: '', custom_location: '',
+  stopped_date: '', stopped_country: '',
+  delivery_fee: '', amount_paid: '', notes: ''
 }
 
 function AdminDashboard({ onLogout, onPublic }) {
@@ -1051,10 +1052,11 @@ function AdminDashboard({ onLogout, onPublic }) {
   )
 
   const counts = {
-    total: shipments.length,
-    pending: shipments.filter(s => s.status === 'Pending').length,
-    transit: shipments.filter(s => s.status === 'In Transit').length,
-    delivered: shipments.filter(s => s.status === 'Delivered').length,
+    total:      shipments.length,
+    processing: shipments.filter(s => s.status === 'Processing' || s.status === 'Pending').length,
+    moving:     shipments.filter(s => s.status === 'Moving' || s.status === 'In Transit').length,
+    stopped:    shipments.filter(s => s.status === 'Stopped').length,
+    delivered:  shipments.filter(s => s.status === 'Delivered').length,
   }
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
@@ -1124,12 +1126,13 @@ function AdminDashboard({ onLogout, onPublic }) {
             </div>
 
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 28 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 14, marginBottom: 28 }}>
               {[
-                { label: 'Total',      val: counts.total,     color: '#60a5fa' },
-                { label: 'Pending',    val: counts.pending,   color: '#fbbf24' },
-                { label: 'In Transit', val: counts.transit,   color: '#22c55e' },
-                { label: 'Delivered',  val: counts.delivered, color: '#a78bfa' },
+                { label: 'Total',      val: counts.total,      color: '#60a5fa' },
+                { label: 'Processing', val: counts.processing,  color: '#a5b4fc' },
+                { label: 'Moving',     val: counts.moving,      color: '#4ade80' },
+                { label: 'Stopped',    val: counts.stopped,     color: '#f87171' },
+                { label: 'Delivered',  val: counts.delivered,   color: '#34d399' },
               ].map(s => (
                 <div key={s.label} style={{ background: '#0f1923', border: '1px solid #1e2a3a', borderRadius: 12, padding: '18px 20px' }}>
                   <div style={{ fontSize: 11, color: '#64748b', letterSpacing: 1, marginBottom: 8, fontFamily: "'IBM Plex Mono',monospace" }}>{s.label.toUpperCase()}</div>
@@ -1233,13 +1236,27 @@ function AdminDashboard({ onLogout, onPublic }) {
                   <div style={{ fontSize: 11, color: '#64748b', letterSpacing: 1, marginBottom: 6, fontFamily: "'IBM Plex Mono',monospace" }}>STATUS *</div>
                   <select value={form.status} onChange={e => set('status', e.target.value)}
                     style={{ width: '100%', padding: '10px 12px', background: '#060d16', border: '1px solid #2a3a55', borderRadius: 8, color: '#fff', fontSize: 14, fontFamily: 'inherit' }}>
-                    <option>Pending</option>
-                    <option>In Transit</option>
+                    <option>Processing</option>
+                    <option>Moving</option>
+                    <option>Stopped</option>
                     <option>Delivered</option>
                   </select>
                 </div>
                 <FF label="Delivery Fee ($)"  val={form.delivery_fee} onChange={v => set('delivery_fee', v)} type="number" placeholder="0.00" />
                 <FF label="Amount Paid ($)"   val={form.amount_paid}  onChange={v => set('amount_paid', v)}  type="number" placeholder="0.00" />
+              </Sec>
+
+              <Sec title="🚢 Port Locations">
+                <FF label="First Port Location"  val={form.port_1_location} onChange={v => set('port_1_location', v)} placeholder="e.g. Port of Houston, TX" />
+                <FF label="Second Port Location" val={form.port_2_location} onChange={v => set('port_2_location', v)} placeholder="e.g. Port of Rotterdam, Netherlands" />
+                <FF label="Last Port Location"   val={form.port_3_location} onChange={v => set('port_3_location', v)} placeholder="e.g. Port of Lagos, Nigeria" />
+                <FF label="Custom / Current Location" val={form.custom_location} onChange={v => set('custom_location', v)} placeholder="e.g. Clearing at Apapa Wharf" />
+              </Sec>
+
+              <Sec title="⏱️ Delivery Time & Holds">
+                <FF label="Estimated Delivery Time" val={form.estimated_delivery_time} onChange={v => set('estimated_delivery_time', v)} placeholder="e.g. 5–7 business days" />
+                <FF label="Date Stopped (if any)"   val={form.stopped_date}   onChange={v => set('stopped_date', v)}   type="date" />
+                <FF label="Country / Location Stopped" val={form.stopped_country} onChange={v => set('stopped_country', v)} placeholder="e.g. Dubai, UAE — Customs Hold" />
               </Sec>
 
               <Sec title="📝 Notes">
