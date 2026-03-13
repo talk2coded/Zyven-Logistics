@@ -75,7 +75,7 @@ ${(s.port_1_location || s.port_2_location || s.port_3_location) ? `
   <div class="row"><span class="lbl">Phone</span><span class="val">${s.receiver_phone}</span></div>
   <div class="row"><span class="lbl">Email</span><span class="val">${s.receiver_email || '—'}</span></div>
   <div class="row"><span class="lbl">Address</span><span class="val">${s.receiver_address}</span></div>
-  <div class="row"><span class="lbl">City</span><span class="val">${s.receiver_city}</span></div>
+  <div class="row"><span class="lbl">Country</span><span class="val">${s.receiver_country || '—'}</span></div>
 </div>
 <div class="sec">
   <div class="sh">Package</div>
