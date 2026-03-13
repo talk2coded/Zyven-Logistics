@@ -3095,17 +3095,17 @@ function TrackerPage({ onBack, onAdminClick }) {
                 </div>
                 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <StatusBadge status={result.status} />
+                <StatusBadge status={result.status} />
                   <div style={{
                     padding: '8px 16px',
                     background: 'rgba(6,13,22,0.5)',
                     borderRadius: 8,
                     border: '1px solid #2a3a55'
                   }}>
-                    <div style={{ fontSize: 10, color: '#64748b', letterSpacing: 1, marginBottom: 2 }}>LAST UPDATED</div>
-                    <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 600 }}>
-                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </div>
+                   <div style={{ fontSize: 10, color: '#64748b', letterSpacing: 1, marginBottom: 2 }}>LAST UPDATED</div>
+<div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 600 }}>
+  {result.last_updated || '—'}
+</div>
                   </div>
                 </div>
               </div>
@@ -3407,6 +3407,7 @@ const EMPTY = {
   port_1_location: '', port_2_location: '', port_3_location: '',
   estimated_delivery_time: '', custom_location: '',
   stopped_date: '', stopped_country: '',
+  last_updated: '',
   delivery_fee: '', amount_paid: '', notes: ''
 }
 
@@ -3683,6 +3684,7 @@ function AdminDashboard({ onLogout, onPublic }) {
               </Sec>
 
               <Sec title="⏱️ Delivery Time & Holds">
+              <FF label="Last Updated" val={form.last_updated} onChange={v => set('last_updated', v)} placeholder="e.g. 10:45 AM, 2 hours ago, Just now" />
                 <FF label="Estimated Delivery Time" val={form.estimated_delivery_time} onChange={v => set('estimated_delivery_time', v)} placeholder="e.g. 5–7 business days" />
                 <FF label="Date Stopped (if any)"   val={form.stopped_date}   onChange={v => set('stopped_date', v)}   type="date" />
                 <FF label="Country / Location Stopped" val={form.stopped_country} onChange={v => set('stopped_country', v)} placeholder="e.g. Dubai, UAE — Customs Hold" />
