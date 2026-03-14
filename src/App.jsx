@@ -3420,6 +3420,17 @@ function AdminDashboard({ onLogout, onPublic }) {
   const [search, setSearch]     = useState('')
   const [msg, setMsg]           = useState({ text: '', ok: true })
   const [saving, setSaving]     = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+const [sidebarOpen, setSidebarOpen] = useState(false)
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 768)
+    if (window.innerWidth > 768) setSidebarOpen(false)
+  }
+  window.addEventListener('resize', handleResize)
+  return () => window.removeEventListener('resize', handleResize)
+}, [])
 
   const flash = (text, ok = true) => { setMsg({ text, ok }); setTimeout(() => setMsg({ text: '', ok: true }), 3500) }
 
@@ -3494,7 +3505,7 @@ function AdminDashboard({ onLogout, onPublic }) {
     <div style={{ minHeight: '100vh', background: '#060d16', display: 'flex' }}>
 
       {/* Sidebar */}
-      <aside style={{ width: 220, background: '#0a1422', borderRight: '1px solid #1a2840', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 50 }}>
+      <aside style={{ width: 220, background: '#0a1422', borderRight: '1px solid #1a2840', display: 'flex', flexDirection: 'column', position: 'fixed', height: '100vh', zIndex: 50, transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)', transition: 'transform 0.3s ease' }}>
         <div style={{ padding: '24px 20px 18px', borderBottom: '1px solid #1a2840' }}>
           <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 20, fontWeight: 700, color: '#fff' }}>
             ZYVEN<span style={{ color: BRAND_COLOR }}>.</span>
@@ -3528,8 +3539,23 @@ function AdminDashboard({ onLogout, onPublic }) {
       </aside>
 
       {/* Main content */}
-      <main style={{ marginLeft: 220, flex: 1, padding: '28px 32px', minWidth: 0 }}>
-
+      <main style={{ marginLeft: isMobile ? 0 : 220, flex: 1, padding: isMobile ? '16px' : '28px 32px', minWidth: 0 }}>
+      {isMobile && (
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid #1a2840' }}>
+    <div>
+      <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: 18, fontWeight: 700, color: '#fff' }}>
+        ZYVEN<span style={{ color: BRAND_COLOR }}>.</span>
+      </div>
+      <div style={{ fontSize: 10, letterSpacing: 2, color: BRAND_COLOR }}>ADMIN PANEL</div>
+    </div>
+    <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: '#0f1923', border: '1px solid #1a2840', borderRadius: 8, padding: '8px 14px', color: '#fff', cursor: 'pointer', fontSize: 18 }}>
+      {sidebarOpen ? '✕' : '☰'}
+    </button>
+  </div>
+)}
+{isMobile && sidebarOpen && (
+  <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 49 }} />
+)}
         {/* Flash message */}
         {msg.text && (
           <div style={{
@@ -3555,7 +3581,7 @@ function AdminDashboard({ onLogout, onPublic }) {
             </div>
 
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 14, marginBottom: 28 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(5,1fr)', gap: isMobile ? 10 : 14, marginBottom: 28 }}>
               {[
                 { label: 'Total',      val: counts.total,      color: '#60a5fa' },
                 { label: 'Processing', val: counts.processing,  color: '#a5b4fc' },
@@ -3565,7 +3591,7 @@ function AdminDashboard({ onLogout, onPublic }) {
               ].map(s => (
                 <div key={s.label} style={{ background: '#0f1923', border: '1px solid #1e2a3a', borderRadius: 12, padding: '18px 20px' }}>
                   <div style={{ fontSize: 11, color: '#64748b', letterSpacing: 1, marginBottom: 8, fontFamily: "'IBM Plex Mono',monospace" }}>{s.label.toUpperCase()}</div>
-                  <div style={{ fontSize: 32, fontWeight: 700, color: s.color }}>{s.val}</div>
+                  <div style={{ fontSize: isMobile ? 24 : 32, fontWeight: 700, color: s.color }}>{s.val}</div>
                 </div>
               ))}
             </div>
@@ -3576,6 +3602,8 @@ function AdminDashboard({ onLogout, onPublic }) {
 
             {/* Table */}
             <div style={{ background: '#0a1422', border: '1px solid #1a2840', borderRadius: 12, overflow: 'hidden' }}>
+<div style={{ overflowX: 'auto' }}>
+<div style={{ minWidth: 640 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.4fr 1fr 1fr 1.3fr', padding: '12px 20px', background: '#060d16', borderBottom: '1px solid #1a2840', fontSize: 11, color: '#475569', letterSpacing: 1, fontFamily: "'IBM Plex Mono',monospace" }}>
                 <span>TRACKING ID</span><span>SENDER</span><span>RECEIVER</span><span>STATUS</span><span>DELIVERY</span><span>ACTIONS</span>
               </div>
@@ -3603,6 +3631,8 @@ function AdminDashboard({ onLogout, onPublic }) {
                   </div>
                 </div>
               ))}
+          </div>
+            </div>
             </div>
           </>
         )}
