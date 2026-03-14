@@ -3250,7 +3250,7 @@ function TrackerPage({ onBack, onAdminClick }) {
               )}
 
               {/* Financial Details */}
-              {(result.delivery_fee || result.amount_paid) && (
+              {/* {(result.delivery_fee || result.amount_paid) && (
                 <div style={{
                   background: 'rgba(34,197,94,0.05)',
                   border: '1px solid rgba(34,197,94,0.2)',
@@ -3287,7 +3287,7 @@ function TrackerPage({ onBack, onAdminClick }) {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           )}
         </div>
