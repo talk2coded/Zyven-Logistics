@@ -3463,7 +3463,9 @@ useEffect(() => {
       }
     }
     setSaving(true)
-    const payload = { ...form, package_weight: parseFloat(form.package_weight) || null, delivery_fee: parseFloat(form.delivery_fee) || null, amount_paid: parseFloat(form.amount_paid) || null, stopped_date: form.stopped_date || null }
+    const now = new Date()
+    const timeStr = now.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    const payload = { ...form, package_weight: parseFloat(form.package_weight) || null, delivery_fee: parseFloat(form.delivery_fee) || null, amount_paid: parseFloat(form.amount_paid) || null, stopped_date: form.stopped_date || null, last_updated: timeStr }
 
     let error
     if (editId) {
@@ -3714,7 +3716,7 @@ useEffect(() => {
               </Sec>
 
               <Sec title="⏱️ Delivery Time & Holds">
-              <FF label="Last Updated" val={form.last_updated} onChange={v => set('last_updated', v)} placeholder="e.g. 10:45 AM, 2 hours ago, Just now" />
+             
                 <FF label="Estimated Delivery Time" val={form.estimated_delivery_time} onChange={v => set('estimated_delivery_time', v)} placeholder="e.g. 5–7 business days" />
                 <FF label="Date Stopped (if any)"   val={form.stopped_date}   onChange={v => set('stopped_date', v)}   type="date" />
                 <FF label="Country / Location Stopped" val={form.stopped_country} onChange={v => set('stopped_country', v)} placeholder="e.g. Dubai, UAE — Customs Hold" />
