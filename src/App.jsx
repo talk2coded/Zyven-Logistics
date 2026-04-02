@@ -3709,7 +3709,7 @@ useEffect(() => {
               <Sec title="🚢 Port Locations">
                 <FF label="First Port Location"  val={form.port_1_location} onChange={v => set('port_1_location', v)} placeholder="e.g. Port of Houston, TX" />
                 <FF label="Second Port Location" val={form.port_2_location} onChange={v => set('port_2_location', v)} placeholder="e.g. Port of Rotterdam, Netherlands" />
-                <FF label="Last Port Location"   val={form.port_3_location} onChange={v => set('port_3_location', v)} placeholder="e.g. Port of Lagos, Nigeria" />
+                <FF label="Last Port Location"   val={form.port_3_location} onChange={v => set('port_3_location', v)} placeholder="e.g. Port of London, UK" />
                 <FF label="Custom / Current Location" val={form.custom_location} onChange={v => set('custom_location', v)} placeholder="e.g. Clearing at Apapa Wharf" />
               </Sec>
 
