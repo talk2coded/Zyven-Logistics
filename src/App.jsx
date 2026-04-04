@@ -2061,7 +2061,7 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
     { 
       icon: '📞', 
       title: 'Phone Support',
-      main: '+1 (810) 383-3304',
+      main: '+1 (310) 498-2761',
       hours: 'Mon-Fri: 8am - 6pm CST',
       action: 'Call Now',
       link: 'tel:: +13193803526'
@@ -2506,7 +2506,7 @@ function ContactPage({ onBack, onTrackClick, onAboutClick }) {
               fontFamily: "'IBM Plex Mono',monospace",
               textDecoration: 'none'
             }}>
-            +1 (810) 383-3304
+  +1 (310) 498-2761          
             </a>
           </div>
         </section>
