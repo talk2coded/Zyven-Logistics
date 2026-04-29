@@ -3152,7 +3152,7 @@ function TrackerPage({ onBack, onAdminClick }) {
                   ['Current', result.status === 'Delivered' ? null : result.status === 'Stopped' ? result.stopped_country || result.current_location : result.current_location || result.custom_location || 'In Transit'],
                 
                   ['Next Stop', result.port_2_location || '—'],
-                  ['Destination', result.receiver_city],
+                  ['Destination', result.port_3_location],
                 ]} />
                 
                 <InfoCard title="👥 Parties" rows={[
